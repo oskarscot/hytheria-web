@@ -13,7 +13,8 @@ if (!mongoUri) {
 }
 
 const mongoDbName =
-  process.env.NODE_ENV === "production" ? "hytheria_live" : "hytheria_staging";
+  process.env.MONGODB_DB_NAME ||
+  (process.env.NODE_ENV === "production" ? "hytheria_live" : "hytheria_staging");
 
 const client = new MongoClient(mongoUri);
 

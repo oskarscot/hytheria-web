@@ -2,6 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import matter from "gray-matter"
 import { compileMDX } from "next-mdx-remote/rsc"
+import { Video, VideoEmbed } from "@/components/mdx/Video"
 
 const contentRoot = path.join(process.cwd(), "content")
 
@@ -132,6 +133,7 @@ export async function getNewsPost(slug: string) {
   const { content: renderedContent } = await compileMDX({
     source: content,
     options: { parseFrontmatter: false },
+    components: { Video, VideoEmbed },
   })
 
   return {
@@ -145,6 +147,7 @@ export async function getGuidePost(slug: string) {
   const { content: renderedContent } = await compileMDX({
     source: content,
     options: { parseFrontmatter: false },
+    components: { Video, VideoEmbed },
   })
 
   return {

@@ -14,7 +14,7 @@ export interface PendingPurchase {
   recipientUsername: string;
   isGift: boolean;
   amount: number;
-  status: "pending" | "fulfilled" | "failed";
+  status: "pending" | "completed" | "fulfilled" | "failed";
   createdAt: Date;
   expiresAt?: Date;
 }

@@ -6,6 +6,7 @@ import { NavbarAuth } from "@/components/layout/NavbarAuth"
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/Button"
+import { CopyLinkButton } from "@/components/ui/CopyLinkButton"
 import { getAllNewsPosts, getNewsPost } from "@/lib/content"
 
 export async function generateStaticParams() {
@@ -121,18 +122,16 @@ export default async function NewsPostPage({ params }: { params: Promise<{ slug:
                       </article>
                    </div>
                    
-                   <aside className="space-y-8 hidden lg:block">
-                      <div className="sticky top-32 space-y-6">
-                         <div className="p-6 rounded-xl bg-slate-900/50 border border-white/5">
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4">Share this</h3>
-                            <div className="flex gap-2">
-                               <Button size="sm" variant="ghost" className="w-full border border-white/10 hover:bg-white/5 hover:text-white">
-                                  Copy Link
-                               </Button>
-                            </div>
-                         </div>
-                      </div>
-                   </aside>
+                    <aside className="space-y-8 hidden lg:block">
+                       <div className="sticky top-32 space-y-6">
+                          <div className="p-6 rounded-xl bg-slate-900/50 border border-white/5">
+                             <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4">Share this</h3>
+                             <div className="flex gap-2">
+                                <CopyLinkButton />
+                             </div>
+                          </div>
+                       </div>
+                    </aside>
                 </div>
               </div>
             </div>

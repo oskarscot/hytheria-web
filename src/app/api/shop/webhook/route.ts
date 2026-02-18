@@ -51,7 +51,7 @@ export async function POST(request: Request) {
           recipientUsername: recipient,
           isGift,
           amount: product.price * item.quantity,
-          status: "pending",
+          status: "completed",
         });
       }
     } else {
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
             recipientUsername: "self",
             isGift: false,
             amount: product.price,
-            status: "pending",
+            status: "completed",
           });
         }
       }
