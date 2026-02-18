@@ -3,12 +3,13 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, Calendar, User } from "lucide-react"
 import { NavbarAuth } from "@/components/layout/NavbarAuth"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar"
+import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/Button"
 import { CopyLinkButton } from "@/components/ui/CopyLinkButton"
 import { getAllNewsPosts, getNewsPost } from "@/lib/content"
 import { Metadata } from "next"
+import { CartButton } from "@/components/shop/BuyButton"
 
 export async function generateStaticParams() {
   const posts = await getAllNewsPosts()
@@ -52,27 +53,10 @@ export default async function NewsPostPage({ params }: { params: Promise<{ slug:
   return (
     <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans flex flex-col">
       <Navbar>
-        <NavbarBrand>
-          <span className="font-bold text-xl text-yellow-500">HYTHERIA</span>
-        </NavbarBrand>
-
-        <NavbarContent>
-          <NavbarItem href="/">Home</NavbarItem>
-          <NavbarItem href="/features">Features</NavbarItem>
-          <NavbarItem href="/leaderboards">Leaderboards</NavbarItem>
-          <NavbarItem href="/news" active>
-            News
-          </NavbarItem>
-          <NavbarItem href="/guides">Guides</NavbarItem>
-          <NavbarItem href="/store">Store</NavbarItem>
-        </NavbarContent>
-
-        <div className="flex items-center gap-4 justify-end">
-          <NavbarAuth />
-          <Button variant="default" className="shadow-[0_0_20px_rgba(234,179,8,0.4)] border-yellow-400/30 font-bold">
-            Play Now
-          </Button>
-        </div>
+          <div className="flex items-center gap-4">
+            <CartButton />
+            <NavbarAuth />
+          </div>
       </Navbar>
 
       <main className="flex-grow pt-32 pb-20 relative overflow-hidden">

@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/Button"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar"
+import { Navbar } from "@/components/layout/Navbar"
 import { NavbarAuth } from "@/components/layout/NavbarAuth"
-import { PlayNowButton } from "@/components/layout/PlayNowButton"
 import { Hero } from "@/components/layout/Hero"
 import { HeroButtons } from "@/components/layout/HeroButtons"
 import { Footer } from "@/components/layout/Footer"
@@ -9,8 +7,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card"
 import { Users, Map, Scroll, ArrowRight, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { Button } from "@/components/ui/Button"
 import { getAllNewsPosts } from "@/lib/content"
 import { getServerStats } from "@/lib/queries/stats"
+import { CartButton } from "@/components/shop/BuyButton"
 
 export const revalidate = 600; // 10 minutes
 
@@ -26,23 +26,10 @@ export default async function Home() {
       
       {/* Navigation */}
       <Navbar>
-        <NavbarBrand>
-          <span className="font-bold text-xl text-yellow-500">HYTHERIA</span>
-        </NavbarBrand>
-        
-        <NavbarContent>
-          <NavbarItem href="/" active>Home</NavbarItem>
-          <NavbarItem href="/features">Features</NavbarItem>
-          <NavbarItem href="/leaderboards">Leaderboards</NavbarItem>
-          <NavbarItem href="/news">News</NavbarItem>
-          <NavbarItem href="/guides">Guides</NavbarItem>
-          <NavbarItem href="/store">Store</NavbarItem>
-        </NavbarContent>
-
-        <div className="flex items-center gap-4 justify-end">
-          <NavbarAuth />
-          <PlayNowButton />
-        </div>
+          <div className="flex items-center gap-4">
+            <CartButton />
+            <NavbarAuth />
+          </div>
       </Navbar>
 
       {/* Hero Section */}
@@ -51,8 +38,8 @@ export default async function Home() {
       </Hero>
 
       {/* Stats Section - Floating Cards */}
-      <section className="relative z-20 -mt-32 container mx-auto px-4 pb-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="relative z-20 -mt-24 container mx-auto px-4 pb-24 pointer-events-none">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pointer-events-auto">
             {[
               { 
                 label: "Unique Players", 

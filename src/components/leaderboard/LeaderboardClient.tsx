@@ -84,72 +84,81 @@ export function LeaderboardClient({ initialData, initialCategory }: LeaderboardC
         ))}
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl overflow-hidden border border-white/5">
-        <table className="w-full table-fixed">
-          <thead>
-            <tr className="bg-slate-900/80 text-slate-400 text-xs uppercase tracking-widest">
-              <th className="px-4 py-4 text-left font-bold w-24">Rank</th>
-              <th className="px-4 py-4 text-left font-bold">Player</th>
-              <th className="px-4 py-4 text-right font-bold w-40">
-                {categories.find((c) => c.id === activeTab)?.label}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {entries.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
-                  No data available
-                </td>
+      {/* Table - Responsive Wrapper */}
+      <div className="rounded-xl overflow-hidden border border-white/5 bg-slate-900/40">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[500px] border-collapse">
+            <thead>
+              <tr className="bg-slate-950/80 border-b border-white/5 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                <th className="px-6 py-4 text-center w-20">#</th>
+                <th className="px-6 py-4 text-left">Player</th>
+                <th className="px-6 py-4 text-right">
+                  {categories.find((c) => c.id === activeTab)?.label ?? "Score"}
+                </th>
               </tr>
-            ) : (
-              entries.map((entry) => (
-                <tr
-                  key={entry.rank}
-                  className="bg-slate-900/40 hover:bg-slate-800/60 transition-colors"
-                >
-                  <td className="px-4 py-4">
-                    <span
-                      className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
-                        entry.rank === 1
-                          ? "bg-yellow-600 text-white"
-                          : entry.rank === 2
-                          ? "bg-slate-400 text-black"
-                          : entry.rank === 3
-                          ? "bg-amber-700 text-white"
-                          : "bg-slate-800 text-slate-400"
-                      }`}
-                    >
-                      {entry.rank}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={`https://hyvatar.io/render/${entry.playerName}?size=128&rotate=0`}
-                        alt={entry.playerName}
-                        className="w-8 h-8 rounded-md"
-                      />
-                      <span className="text-white font-bold font-display">
-                        {entry.playerName}
-                      </span>
-                      {playerRanks[entry.playerName] && playerRanks[entry.playerName] !== "default" && (
-                        <RankBadge rank={playerRanks[entry.playerName]} />
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <span className="text-yellow-400 font-mono font-bold">
-                      {activeTab === "playtime" ? formatPlaytime(entry.value) : entry.value.toLocaleString()}
-                    </span>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {entries.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-slate-500 font-light">
+                    No data available for this category yet.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                entries.map((entry) => (
+                  <tr
+                    key={entry.playerName} // Use playerName as key if rank changes
+                    className="group hover:bg-white/5 transition-colors duration-200"
+                  >
+                    <td className="px-6 py-4 text-center">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shadow-lg ring-1 ring-inset ${
+                          entry.rank === 1
+                            ? "bg-yellow-500/20 text-yellow-400 ring-yellow-500/50"
+                            : entry.rank === 2
+                            ? "bg-slate-300/20 text-slate-200 ring-slate-400/50"
+                            : entry.rank === 3
+                            ? "bg-amber-700/20 text-amber-500 ring-amber-700/50"
+                            : "bg-slate-800 text-slate-500 ring-transparent"
+                        }`}
+                      >
+                        {entry.rank}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-950 border border-white/10 group-hover:border-yellow-500/50 transition-colors shrink-0">
+                            <img
+                              src={`https://hyvatar.io/render/${entry.playerName}?size=128&rotate=0`}
+                              alt={entry.playerName}
+                              className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                            <span className="text-slate-100 font-bold font-display tracking-wide group-hover:text-yellow-400 transition-colors">
+                              {entry.playerName}
+                            </span>
+                            {playerRanks[entry.playerName] && playerRanks[entry.playerName] !== "default" && (
+                              <div className="scale-90 origin-left sm:scale-100">
+                                <RankBadge rank={playerRanks[entry.playerName]} />
+                              </div>
+                            )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-yellow-500 font-mono font-bold text-lg drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] whitespace-nowrap">
+                        {activeTab === "playtime" ? formatPlaytime(Number(entry.value)) : Number(entry.value).toLocaleString()}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   );
 }

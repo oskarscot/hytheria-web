@@ -19,7 +19,7 @@ export function NavbarAuth() {
 
   if (isPending) {
     return (
-      <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-slate-400 opacity-50 cursor-wait hover:bg-transparent">
+      <Button variant="ghost" size="sm" className="text-slate-400 opacity-50 cursor-wait hover:bg-transparent">
         Loading...
       </Button>
     )
@@ -28,19 +28,12 @@ export function NavbarAuth() {
   if (session) {
     return (
       <>
-        {!isDashboard && (
-          <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-slate-400 hover:text-yellow-200 hover:bg-transparent">
-              Dashboard
-            </Button>
-          </Link>
-        )}
         {isDashboard && (
           <Button 
             onClick={handleLogout}
             variant="ghost" 
             size="sm" 
-            className="hidden sm:inline-flex text-slate-400 hover:text-red-400 hover:bg-transparent"
+            className="text-slate-400 hover:text-red-400 hover:bg-transparent"
           >
             Logout
           </Button>
@@ -54,7 +47,7 @@ export function NavbarAuth() {
       asChild
       variant="ghost" 
       size="sm" 
-      className="hidden sm:inline-flex text-slate-400 hover:text-yellow-200 hover:bg-transparent"
+      className="text-slate-400 hover:text-yellow-200 hover:bg-transparent"
     >
       <a href="/login">Login</a>
     </Button>

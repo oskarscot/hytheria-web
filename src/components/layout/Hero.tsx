@@ -33,7 +33,7 @@ const Hero = React.forwardRef<
     </div>
 
     {/* Content Container */}
-    <div className="relative z-10 container px-4 max-w-4xl mx-auto space-y-10 animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-8">
+    <div className="relative z-10 container px-4 max-w-4xl mx-auto space-y-10 animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-8 pb-32">
       
       {/* Online Players Badge */}
       <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/30 bg-black/40 backdrop-blur-sm text-green-400 text-xs font-bold tracking-[0.1em] uppercase font-sans shadow-[0_0_20px_rgba(34,197,94,0.1)] mb-2">
@@ -65,7 +65,7 @@ const Hero = React.forwardRef<
     </div>
     
     {/* Scroll Indicator */}
-    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-yellow-500/50 animate-bounce">
+    <div className="absolute bottom-32 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-yellow-500/50 animate-bounce pointer-events-none">
       <span className="text-[10px] uppercase tracking-[0.3em]">Explore</span>
       <div className="w-[1px] h-12 bg-gradient-to-b from-yellow-500/50 to-transparent" />
     </div>
