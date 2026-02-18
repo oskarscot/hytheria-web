@@ -24,11 +24,20 @@ export const metadata: Metadata = {
     siteName: "Hytheria",
     title: "Hytheria - Skyblock Reimagined",
     description: "Hytheria provides The ultimate Hytale SkyBlock experience. Build your island and rise to the top.",
+    images: [
+      {
+        url: "/images/banner.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Hytheria - Skyblock Reimagined",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Hytheria - Skyblock Reimagined",
     description: "Hytheria provides The ultimate Hytale SkyBlock experience. Build your island and rise to the top.",
+    images: ["/images/banner.jpg"],
   },
   robots: {
     index: true,

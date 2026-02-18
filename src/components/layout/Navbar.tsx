@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Menu, X } from "lucide-react"
+import { authClient } from "@/lib/auth-client"
 
 // --- Configuration ---
 const NAV_LINKS = [
@@ -84,6 +85,8 @@ export interface NavbarProps {
 export function Navbar({ children }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false)
   const pathname = usePathname()
+  const { data: session } = authClient.useSession()
+  const isLoggedIn = !!session
 
   // Close mobile menu when route changes
   React.useEffect(() => {
@@ -113,7 +116,7 @@ export function Navbar({ children }: NavbarProps) {
       <div className="flex-1 flex justify-end items-center gap-4">
         {/* DESKTOP ONLY: Auth, Cart, Dashboard Link */}
         <div className="hidden md:flex items-center gap-4">
-          {!pathname.startsWith("/dashboard") && (
+          {isLoggedIn && !pathname.startsWith("/dashboard") && (
             <NavItem 
               href="/dashboard" 
               label="Dashboard" 
@@ -153,7 +156,7 @@ export function Navbar({ children }: NavbarProps) {
                 {link.label}
               </Link>
             ))}
-             {!pathname.startsWith("/dashboard") && (
+             {isLoggedIn && !pathname.startsWith("/dashboard") && (
                 <Link
                   href="/dashboard"
                   className={cn(

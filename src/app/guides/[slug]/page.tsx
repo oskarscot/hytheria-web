@@ -8,10 +8,46 @@ import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/Button"
 import { getAllGuidePosts, getGuidePost } from "@/lib/content"
 import { CartButton } from "@/components/shop/BuyButton"
+import { Metadata } from "next"
 
 export async function generateStaticParams() {
   const posts = await getAllGuidePosts()
   return posts.map((post) => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const guide = await getGuidePost(slug).catch(() => null)
+  
+  if (!guide) {
+    return { title: "Guides" }
+  }
+
+  const imageUrl = guide.image || "/images/banner.jpg"
+
+  return {
+    title: guide.title,
+    description: guide.summary,
+    openGraph: {
+      title: guide.title,
+      description: guide.summary,
+      type: "article",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: guide.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: guide.title,
+      description: guide.summary,
+      images: [imageUrl],
+    },
+  }
 }
 
 export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
