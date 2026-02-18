@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import LinkForm from "@/app/dashboard/link/LinkForm";
+import LinkForm from "./LinkForm";
 
 export default function LinkFormClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);

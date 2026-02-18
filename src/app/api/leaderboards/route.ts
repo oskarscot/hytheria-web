@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getLeaderboard } from "@/lib/queries/leaderboards";
+import { getLeaderboardData } from "@/lib/queries/leaderboards";
+
+export const revalidate = 900; // 15 minutes
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,6 +12,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid page" }, { status: 400 });
   }
 
-  const leaderboard = await getLeaderboard(category, page);
-  return NextResponse.json(leaderboard);
+  try {
+    const leaderboard = await getLeaderboardData(category, page);
+    return NextResponse.json(leaderboard);
+  } catch (error) {
+    console.error("Leaderboard error:", error);
+    return NextResponse.json({ error: "Internal server error", details: String(error) }, { status: 500 });
+  }
 }
