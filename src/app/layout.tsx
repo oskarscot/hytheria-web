@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     default: "Hytheria - Skyblock Reimagined",
     template: "%s | Hytheria",
   },
-  description: "The premier modern fantasy Skyblock experience on Hytale. Join now at play.hytheria.gg",
+  description: "Hytheria provides The ultimate Hytale SkyBlock experience. Build your island and rise to the top.",
   keywords: ["hytale", "skyblock", "minecraft", "server", "gaming", "fantasy"],
   authors: [{ name: "Hytheria" }],
   creator: "Hytheria",
@@ -23,21 +23,12 @@ export const metadata: Metadata = {
     url: "https://hytheria.gg",
     siteName: "Hytheria",
     title: "Hytheria - Skyblock Reimagined",
-    description: "The premier modern fantasy Skyblock experience on Hytale.",
-    images: [
-      {
-        url: "/images/background.png",
-        width: 1200,
-        height: 630,
-        alt: "Hytheria - Skyblock Reimagined",
-      },
-    ],
+    description: "Hytheria provides The ultimate Hytale SkyBlock experience. Build your island and rise to the top.",
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Hytheria - Skyblock Reimagined",
-    description: "The premier modern fantasy Skyblock experience on Hytale.",
-    images: ["/images/background.png"],
+    description: "Hytheria provides The ultimate Hytale SkyBlock experience. Build your island and rise to the top.",
   },
   robots: {
     index: true,
@@ -59,6 +50,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        <meta name="theme-color" content="#ca8a04" />
+      </head>
       <body className="antialiased min-h-screen">
         <Providers>{children}</Providers>
       </body>

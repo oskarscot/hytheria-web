@@ -8,10 +8,37 @@ import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/Button"
 import { CopyLinkButton } from "@/components/ui/CopyLinkButton"
 import { getAllNewsPosts, getNewsPost } from "@/lib/content"
+import { Metadata } from "next"
 
 export async function generateStaticParams() {
   const posts = await getAllNewsPosts()
   return posts.map((post) => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const post = await getNewsPost(slug).catch(() => null)
+  
+  if (!post) {
+    return { title: "News" }
+  }
+
+  return {
+    title: post.title,
+    description: post.summary,
+    openGraph: {
+      title: post.title,
+      description: post.summary,
+      type: "article",
+      publishedTime: post.date,
+      authors: [post.author || "Hytheria"],
+    },
+    twitter: {
+      card: "summary",
+      title: post.title,
+      description: post.summary,
+    },
+  }
 }
 
 export default async function NewsPostPage({ params }: { params: Promise<{ slug: string }> }) {
