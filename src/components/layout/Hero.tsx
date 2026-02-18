@@ -67,12 +67,6 @@ const Hero = React.forwardRef<
         {props.children}
       </div>
     </div>
-    
-    {/* Scroll Indicator */}
-    <div className="absolute bottom-32 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-yellow-500/50 animate-bounce pointer-events-none">
-      <span className="text-[10px] uppercase tracking-[0.3em]">Explore</span>
-      <div className="w-[1px] h-12 bg-gradient-to-b from-yellow-500/50 to-transparent" />
-    </div>
   </section>
 ))
 Hero.displayName = "Hero"

@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/Button"
 import { getAllNewsPosts } from "@/lib/content"
 import { getServerStats } from "@/lib/queries/stats"
 import { CartButton } from "@/components/shop/BuyButton"
+import { CartProvider } from "@/components/shop/CartContext"
+import { CartDrawer } from "@/components/shop/CartDrawer"
 
 export const revalidate = 600; // 10 minutes
 
@@ -22,20 +24,21 @@ export default async function Home() {
   const displayedNews = latestNews.slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans">
-      
-      {/* Navigation */}
-      <Navbar>
-          <div className="flex items-center gap-4">
-            <CartButton />
-            <NavbarAuth />
-          </div>
-      </Navbar>
+    <CartProvider>
+      <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans">
+        
+        {/* Navigation */}
+        <Navbar>
+            <div className="flex items-center gap-4">
+              <CartButton />
+              <NavbarAuth />
+            </div>
+        </Navbar>
 
-      {/* Hero Section */}
-      <Hero>
-        <HeroButtons />
-      </Hero>
+        {/* Hero Section */}
+        <Hero>
+          <HeroButtons />
+        </Hero>
 
       {/* Stats Section - Floating Cards */}
       <section className="relative z-20 -mt-24 container mx-auto px-4 pb-24 pointer-events-none">
@@ -172,5 +175,8 @@ export default async function Home() {
       {/* Footer - Ornate & Dark */}
       <Footer />
     </div>
+
+    <CartDrawer />
+    </CartProvider>
   )
 }
