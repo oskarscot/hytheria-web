@@ -1,16 +1,24 @@
 import { Button } from "@/components/ui/Button"
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar"
 import { NavbarAuth } from "@/components/layout/NavbarAuth"
+import { PlayNowButton } from "@/components/layout/PlayNowButton"
 import { Hero } from "@/components/layout/Hero"
+import { HeroButtons } from "@/components/layout/HeroButtons"
 import { Footer } from "@/components/layout/Footer"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card"
 import { Users, Map, Scroll, ArrowRight, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { getAllNewsPosts } from "@/lib/content"
+import { getServerStats } from "@/lib/queries/stats"
+
+export const revalidate = 600; // 10 minutes
 
 export default async function Home() {
-  const latestNews = await getAllNewsPosts()
+  const [latestNews, serverStats] = await Promise.all([
+    getAllNewsPosts(),
+    getServerStats()
+  ])
   const displayedNews = latestNews.slice(0, 3)
 
   return (
@@ -33,23 +41,13 @@ export default async function Home() {
 
         <div className="flex items-center gap-4 justify-end">
           <NavbarAuth />
-          <Button variant="default" className="shadow-[0_0_20px_rgba(234,179,8,0.4)] border-yellow-400/30 font-bold">
-            Play Now
-          </Button>
+          <PlayNowButton />
         </div>
       </Navbar>
 
       {/* Hero Section */}
       <Hero>
-        <div className="flex flex-col sm:flex-row gap-6 mt-4 w-full justify-center items-center">
-          <Button variant="hero" size="lg" className="w-64">
-            <span className="relative z-10">COPY IP</span>
-            <div className="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </Button>
-          <Button variant="outline" size="lg" className="w-64 border-slate-700/50 text-slate-400 hover:text-white hover:border-slate-500 hover:bg-slate-800/50 transition-all duration-300">
-            <span>DISCORD</span>
-          </Button>
-        </div>
+        <HeroButtons />
       </Hero>
 
       {/* Stats Section - Floating Cards */}
@@ -58,20 +56,20 @@ export default async function Home() {
             {[
               { 
                 label: "Unique Players", 
-                value: "1,248", 
+                value: serverStats.players.toLocaleString(), 
                 sub: "Adventures Begun",
                 icon: <Users className="w-5 h-5 text-yellow-500" />
               },
               { 
                 label: "Islands Forged", 
-                value: "84,392", 
+                value: serverStats.islands.toLocaleString(), 
                 sub: "Realms Created",
                 icon: <Map className="w-5 h-5 text-yellow-500" />
               },
               { 
-                label: "Quests Completed", 
-                value: "1.2M", 
-                sub: "Legends Written",
+                label: "Time Played", 
+                value: `${serverStats.playtimeHours.toLocaleString()}h`, 
+                sub: "Hours of Adventure",
                 icon: <Scroll className="w-5 h-5 text-yellow-500" />
               },
             ].map((stat, i) => (

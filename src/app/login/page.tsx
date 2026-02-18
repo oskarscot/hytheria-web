@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { User } from "lucide-react";
@@ -21,31 +20,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans flex flex-col">
-      <Navbar>
-        <NavbarBrand>
-          <span className="font-bold text-xl text-yellow-500">HYTHERIA</span>
-        </NavbarBrand>
-
-        <NavbarContent>
-          <NavbarItem href="/">Home</NavbarItem>
-          <NavbarItem href="/features">Features</NavbarItem>
-          <NavbarItem href="/leaderboards">Leaderboards</NavbarItem>
-          <NavbarItem href="/news">News</NavbarItem>
-          <NavbarItem href="/guides">Guides</NavbarItem>
-          <NavbarItem href="/store">Store</NavbarItem>
-        </NavbarContent>
-
-        <div className="flex items-center gap-4 justify-end">
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-slate-400 hover:text-yellow-200 hover:bg-transparent">
-            Login
-          </Button>
-          <Button variant="default" className="shadow-[0_0_20px_rgba(234,179,8,0.4)] border-yellow-400/30 font-bold">
-            Play Now
-          </Button>
-        </div>
-      </Navbar>
-
+    <PageLayout>
       <main className="flex-grow flex items-center justify-center relative overflow-hidden py-32">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0B0E14] to-[#0B0E14] -z-10" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 -z-10" />
@@ -96,8 +71,6 @@ export default function LoginPage() {
             </Card>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

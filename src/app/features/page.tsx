@@ -1,41 +1,12 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar"
-import { Footer } from "@/components/layout/Footer"
-import { Button } from "@/components/ui/Button"
+import { PageLayout } from "@/components/layout/PageLayout"
 import { Sparkles, Pickaxe, Sword, Coins, Scroll, Users, Gavel } from "lucide-react"
 
 export default function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans flex flex-col">
-      <Navbar>
-        <NavbarBrand>
-          <span className="font-bold text-xl text-yellow-500">HYTHERIA</span>
-        </NavbarBrand>
-        
-        <NavbarContent>
-          <NavbarItem href="/">Home</NavbarItem>
-          <NavbarItem href="/features" active>Features</NavbarItem>
-          <NavbarItem href="/leaderboards">Leaderboards</NavbarItem>
-          <NavbarItem href="/news">News</NavbarItem>
-          <NavbarItem href="/guides">Guides</NavbarItem>
-          <NavbarItem href="/store">Store</NavbarItem>
-        </NavbarContent>
-
-        <div className="flex items-center gap-4 justify-end">
-          <Link href="/login">
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-slate-400 hover:text-yellow-200 hover:bg-transparent">
-              Login
-            </Button>
-          </Link>
-          <Button variant="default" className="shadow-[0_0_20px_rgba(234,179,8,0.4)] border-yellow-400/30 font-bold">
-            Play Now
-          </Button>
-        </div>
-      </Navbar>
-
+    <PageLayout active="features">
       <main className="flex-grow pt-32 pb-20 relative overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0B0E14] to-[#0B0E14] -z-10" />
@@ -111,8 +82,6 @@ export default function FeaturesPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   )
 }

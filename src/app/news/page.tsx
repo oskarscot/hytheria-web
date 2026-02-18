@@ -1,42 +1,15 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Calendar, ArrowRight, User } from "lucide-react"
-import { NavbarAuth } from "@/components/layout/NavbarAuth"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar"
-import { Footer } from "@/components/layout/Footer"
+import { ArrowRight, User } from "lucide-react"
+import { PageLayout } from "@/components/layout/PageLayout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
 import { getAllNewsPosts } from "@/lib/content"
 
 export default async function NewsIndexPage() {
   const posts = await getAllNewsPosts()
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans flex flex-col">
-      <Navbar>
-        <NavbarBrand>
-          <span className="font-bold text-xl text-yellow-500">HYTHERIA</span>
-        </NavbarBrand>
-
-        <NavbarContent>
-          <NavbarItem href="/">Home</NavbarItem>
-          <NavbarItem href="/features">Features</NavbarItem>
-          <NavbarItem href="/leaderboards">Leaderboards</NavbarItem>
-          <NavbarItem href="/news" active>
-            News
-          </NavbarItem>
-          <NavbarItem href="/guides">Guides</NavbarItem>
-          <NavbarItem href="/store">Store</NavbarItem>
-        </NavbarContent>
-
-        <div className="flex items-center gap-4 justify-end">
-          <NavbarAuth />
-          <Button variant="default" className="shadow-[0_0_20px_rgba(234,179,8,0.4)] border-yellow-400/30 font-bold">
-            Play Now
-          </Button>
-        </div>
-      </Navbar>
-
+    <PageLayout active="news">
       <main className="flex-grow pt-32 pb-20 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0B0E14] to-[#0B0E14] -z-10" />
 
@@ -79,7 +52,7 @@ export default async function NewsIndexPage() {
                       )}
                       
                       {!post.image && (
-                         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
+                          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
                       )}
 
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
@@ -89,16 +62,16 @@ export default async function NewsIndexPage() {
                           {post.category ?? "Update"}
                         </span>
                         <div className="flex items-center gap-2 text-xs font-serif text-slate-400 bg-black/50 px-2 py-1 rounded border border-white/5">
-                           {post.author && (
-                             <>
-                               <User className="w-3 h-3 text-slate-500" />
-                               <span className="text-slate-300 font-serif">{post.author}</span>
-                               <span className="text-slate-700">|</span>
-                             </>
-                           )}
-                           <span className="text-slate-400 font-serif">
-                             {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                           </span>
+                            {post.author && (
+                              <>
+                                <User className="w-3 h-3 text-slate-500" />
+                                <span className="text-slate-300 font-serif">{post.author}</span>
+                                <span className="text-slate-700">|</span>
+                              </>
+                            )}
+                            <span className="text-slate-400 font-serif">
+                              {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </span>
                         </div>
                       </div>
                     </div>
@@ -115,9 +88,9 @@ export default async function NewsIndexPage() {
                       </p>
                       
                       <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-end">
-                         <span className="text-yellow-500/80 text-xs font-bold uppercase tracking-widest group-hover:text-yellow-400 transition-colors flex items-center gap-2">
+                          <span className="text-yellow-500/80 text-xs font-bold uppercase tracking-widest group-hover:text-yellow-400 transition-colors flex items-center gap-2">
                             Read <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                         </span>
+                          </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -127,8 +100,6 @@ export default async function NewsIndexPage() {
           )}
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   )
 }

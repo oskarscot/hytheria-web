@@ -1,8 +1,6 @@
 import { getLeaderboardData } from "@/lib/queries/leaderboards";
 import { LeaderboardClient } from "@/components/leaderboard/LeaderboardClient";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@/components/layout/Navbar";
-import { NavbarAuth } from "@/components/layout/NavbarAuth";
-import { Footer } from "@/components/layout/Footer";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export const revalidate = 900; // 15 minutes
 
@@ -10,24 +8,7 @@ export default async function LeaderboardsPage() {
   const leaderboard = await getLeaderboardData("coins", 1);
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans flex flex-col">
-      <Navbar>
-        <NavbarBrand>
-          <span className="font-bold text-xl text-yellow-500">HYTHERIA</span>
-        </NavbarBrand>
-        <NavbarContent>
-          <NavbarItem href="/">Home</NavbarItem>
-          <NavbarItem href="/features">Features</NavbarItem>
-          <NavbarItem href="/leaderboards" active>Leaderboards</NavbarItem>
-          <NavbarItem href="/news">News</NavbarItem>
-          <NavbarItem href="/guides">Guides</NavbarItem>
-          <NavbarItem href="/store">Store</NavbarItem>
-        </NavbarContent>
-        <div className="flex items-center gap-4 justify-end">
-          <NavbarAuth />
-        </div>
-      </Navbar>
-
+    <PageLayout active="leaderboards">
       <main className="flex-grow pt-24 pb-20 relative">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0B0E14] to-[#0B0E14] -z-10" />
         
@@ -47,8 +28,6 @@ export default async function LeaderboardsPage() {
           />
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }
