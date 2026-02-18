@@ -6,10 +6,15 @@ export async function GET(request: Request) {
   const players = searchParams.get("players")?.split(",").filter(Boolean) ?? [];
 
   const ranks: Record<string, string> = {};
+  
   for (const player of players) {
-    const rank = await getPlayerRank(player);
-    if (rank) {
-      ranks[player] = rank;
+    try {
+      const rank = await getPlayerRank(player);
+      if (rank) {
+        ranks[player] = rank;
+      }
+    } catch (error) {
+      console.error(`Error fetching rank for ${player}:`, error);
     }
   }
 

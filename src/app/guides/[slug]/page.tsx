@@ -12,7 +12,7 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }))
 }
 
-export default async function GuidePage({ params }: { params: { slug: string } }) {
+export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const guide = await getGuidePost(slug).catch(() => null)
 
