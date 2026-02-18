@@ -45,11 +45,15 @@ const Hero = React.forwardRef<
       </div>
 
       {/* Main Title - Massive & Metallic */}
-      <h1 className="text-7xl md:text-9xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 via-yellow-200 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] font-display relative mt-12">
-        HYTHERIA
+      <div className="relative mt-12 w-full max-w-3xl mx-auto">
+        <img 
+          src="/hytheria-logo.png" 
+          alt="Hytheria" 
+          className="w-full h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
+        />
         {/* Glow behind text */}
-        <span className="absolute -inset-8 blur-3xl bg-yellow-500/20 -z-10 rounded-full opacity-60"></span>
-      </h1>
+        <div className="absolute inset-0 blur-3xl bg-yellow-500/10 -z-10 rounded-full opacity-60 scale-75" />
+      </div>
       
       {/* Subtitle */}
       <p className="text-xl md:text-2xl text-slate-300 font-light tracking-wide max-w-2xl mx-auto leading-relaxed font-sans border-t border-b border-white/5 py-6">
