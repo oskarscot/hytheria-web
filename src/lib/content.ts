@@ -48,14 +48,22 @@ const parseSlug = (filename: string) => filename.replace(/\.mdx$/, "")
 
 async function readContentFile(contentType: ContentType, slug: string) {
   const filePath = path.join(contentRoot, contentTypeConfig[contentType].dir, `${slug}.mdx`)
-  const raw = await fs.readFile(filePath, "utf8")
-  return matter(raw)
+  try {
+    const raw = await fs.readFile(filePath, "utf8")
+    return matter(raw)
+  } catch {
+    return null
+  }
 }
 
 async function getContentSlugs(contentType: ContentType) {
   const dirPath = path.join(contentRoot, contentTypeConfig[contentType].dir)
-  const files = await fs.readdir(dirPath)
-  return files.filter((file) => file.endsWith(".mdx")).map(parseSlug)
+  try {
+    const files = await fs.readdir(dirPath)
+    return files.filter((file) => file.endsWith(".mdx")).map(parseSlug)
+  } catch {
+    return []
+  }
 }
 
 function toNewsPost(slug: string, data: Record<string, unknown>): NewsPost {
@@ -83,12 +91,14 @@ function toGuidePost(slug: string, data: Record<string, unknown>): GuidePost {
 
 export async function getAllNewsPosts() {
   const slugs = await getContentSlugs("news")
-  const posts = await Promise.all(
-    slugs.map(async (slug) => {
-      const { data } = await readContentFile("news", slug)
-      return toNewsPost(slug, data)
-    })
-  )
+  const posts: NewsPost[] = []
+  
+  for (const slug of slugs) {
+    const file = await readContentFile("news", slug)
+    if (file) {
+      posts.push(toNewsPost(slug, file.data))
+    }
+  }
 
   return posts.sort((a, b) => {
     if (!a.date || !b.date) {
@@ -100,12 +110,14 @@ export async function getAllNewsPosts() {
 
 export async function getAllGuidePosts() {
   const slugs = await getContentSlugs("guides")
-  const posts = await Promise.all(
-    slugs.map(async (slug) => {
-      const { data } = await readContentFile("guides", slug)
-      return toGuidePost(slug, data)
-    })
-  )
+  const posts: GuidePost[] = []
+  
+  for (const slug of slugs) {
+    const file = await readContentFile("guides", slug)
+    if (file) {
+      posts.push(toGuidePost(slug, file.data))
+    }
+  }
 
   return posts.sort((a, b) => {
     if (a.category !== b.category) {
@@ -129,29 +141,33 @@ export async function getAllGuidePosts() {
 }
 
 export async function getNewsPost(slug: string) {
-  const { data, content } = await readContentFile("news", slug)
+  const file = await readContentFile("news", slug)
+  if (!file) return null
+  
   const { content: renderedContent } = await compileMDX({
-    source: content,
+    source: file.content,
     options: { parseFrontmatter: false },
     components: { Video, VideoEmbed },
   })
 
   return {
-    ...toNewsPost(slug, data),
+    ...toNewsPost(slug, file.data),
     content: renderedContent,
   }
 }
 
 export async function getGuidePost(slug: string) {
-  const { data, content } = await readContentFile("guides", slug)
+  const file = await readContentFile("guides", slug)
+  if (!file) return null
+  
   const { content: renderedContent } = await compileMDX({
-    source: content,
+    source: file.content,
     options: { parseFrontmatter: false },
     components: { Video, VideoEmbed },
   })
 
   return {
-    ...toGuidePost(slug, data),
+    ...toGuidePost(slug, file.data),
     content: renderedContent,
   }
 }

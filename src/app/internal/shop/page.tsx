@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getAllProducts } from "@/lib/queries/shop";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Copy, Loader2 } from "lucide-react";
@@ -12,14 +12,14 @@ export default function InternalShopPage() {
   const [loading, setLoading] = useState(true);
   const [cloningId, setCloningId] = useState<string | null>(null);
 
-  if (loading) {
+  useEffect(() => {
     fetch("/api/shop/products")
       .then(res => res.json())
       .then(data => {
         setProducts(data);
         setLoading(false);
       });
-  }
+  }, []);
 
   const cloneProduct = async (productId: string) => {
     setCloningId(productId);

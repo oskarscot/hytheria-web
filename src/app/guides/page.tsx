@@ -35,10 +35,10 @@ export default async function GuidesIndexPage() {
           </div>
 
           {guides.length === 0 ? (
-            <Card className="bg-slate-900/50 border-dashed border-2 border-slate-800 p-12 text-center">
+            <Card className="bg-slate-900/50 border-2 border-slate-800 p-12 text-center">
               <CardContent>
-                <p className="text-slate-500 font-mono text-sm uppercase tracking-widest">No archives found.</p>
-                <p className="text-slate-600 text-xs mt-2">Add MDX files to `content/guides` to populate the library.</p>
+                <p className="text-slate-500 text-sm uppercase tracking-widest">No Content</p>
+                <p className="text-slate-600 text-xs mt-2">No guides have been published yet.</p>
               </CardContent>
             </Card>
           ) : (
