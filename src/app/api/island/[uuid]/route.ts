@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { getLinkedAccountByDiscordId } from "@/lib/queries/linked-accounts";
+import { getIslandInfo } from "@/lib/queries/island";
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ uuid: string }> }
+) {
+  const { uuid } = await params;
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const linkedAccount = await getLinkedAccountByDiscordId(session.user?.id ?? "");
+
+  if (!linkedAccount) {
+    return NextResponse.json({ error: "Account not linked" }, { status: 403 });
+  }
+
+  if (linkedAccount.playerUuid !== uuid) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const island = await getIslandInfo(uuid);
+
+  if (!island) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(island);
+}

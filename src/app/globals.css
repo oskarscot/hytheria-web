@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Hytheria Fantasy Brand - Gold & Deep Void */
+  --background: #0B0E14; /* Deep, almost black blue-grey */
+  --foreground: #F0F4F8; /* Soft white */
+
+  /* Primary Gold - Luxurious, metallic, magical */
+  --primary: #FFD700; /* Pure Gold base */
+  --primary-foreground: #1A1A1A;
+  --primary-glow: rgba(255, 215, 0, 0.4);
+
+  /* Secondary / Accents */
+  --secondary: #1E293B; /* Slate 800 - for card backgrounds */
+  --secondary-foreground: #E2E8F0;
+  
+  --accent: #B8860B; /* Dark Goldenrod for depth/borders */
+  
+  --card: rgba(15, 23, 42, 0.7); /* Translucent dark slate */
+  --card-border: rgba(184, 134, 11, 0.3); /* Subtle gold border */
+  
+  --font-display: 'MedievalSharp', cursive;
+  --font-body: 'Noto Serif', serif;
+  --font-ui: 'Cinzel', serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-card: var(--card);
+  
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-ui: var(--font-ui);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), serif;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+    linear-gradient(to bottom, #0B0E14, #05070A);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), cursive;
+  letter-spacing: 0.05em;
+}
+
+.mdx-content h2 {
+  font-size: 1.5rem;
+  color: #fde68a;
+  font-weight: 700;
+  margin-top: 2.5rem;
+}
+
+.mdx-content h3 {
+  font-size: 1.25rem;
+  color: #fcd34d;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+.mdx-content a {
+  color: #facc15;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.mdx-content ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  color: #e2e8f0;
+}
+
+.mdx-content ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  color: #e2e8f0;
+}
+
+.mdx-content strong {
+  color: #fef9c3;
+}
+
+.mdx-content blockquote {
+  border-left: 2px solid rgba(234, 179, 8, 0.6);
+  padding-left: 1rem;
+  color: #cbd5f5;
+  font-style: italic;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  background-color: #0B0E14;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #0F1219;
+  border-left: 1px solid rgba(255, 215, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #B8860B; /* Dark Goldenrod */
+  border: 1px solid #0B0E14;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FFD700; /* Bright Gold */
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
