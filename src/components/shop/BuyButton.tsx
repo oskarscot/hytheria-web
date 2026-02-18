@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "./CartContext";
+import { Button } from "@/components/ui/Button";
 
 export function BuyButton({ productId }: { productId: string }) {
   const [loading, setLoading] = useState(false);
@@ -26,14 +27,15 @@ export function BuyButton({ productId }: { productId: string }) {
   };
 
   return (
-    <button
-      onClick={handleAddToCart}
+    <Button 
+      onClick={handleAddToCart} 
       disabled={loading}
-      className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 disabled:bg-yellow-800 text-white font-bold rounded-lg transition-colors flex items-center gap-2"
+      variant="hero"
+      size="sm"
     >
-      <ShoppingCart className="w-4 h-4" />
+      <ShoppingCart className="w-4 h-4 mr-2" />
       {loading ? "Adding..." : "Add to Cart"}
-    </button>
+    </Button>
   );
 }
 

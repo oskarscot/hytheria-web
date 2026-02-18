@@ -1,33 +1,84 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, Gift, Trash2 } from "lucide-react";
+import { X, Plus, Minus, Trash2 } from "lucide-react";
 import { useCart } from "./CartContext";
+import { Button } from "@/components/ui/Button";
 
 interface CartItem {
   _id: string;
   productId: string;
   quantity: number;
   giftRecipient?: string;
+  recipientUsername?: string;
   product?: {
     _id: string;
     name: string;
     price: number;
     imageUrl?: string;
+    billingType?: string;
+    durationDays?: number;
+    subscriptionInterval?: string;
   };
+}
+
+function getProductDisplayName(item: CartItem): string {
+  const p = item.product;
+  if (!p?.billingType) return p?.name || "Product";
+  
+  if (p.billingType === "subscription") {
+    const interval = p.subscriptionInterval === "year" ? "Yearly" : "Monthly";
+    return `${p.name} (${interval})`;
+  }
+  if (p.billingType === "lifetime") {
+    return `${p.name} (Lifetime)`;
+  }
+  if (p.billingType === "one_time") {
+    const days = p.durationDays || 30;
+    return `${p.name} (${days} Days)`;
+  }
+  return p.name;
 }
 
 export function CartDrawer() {
   const { isOpen, close, refresh } = useCart();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [giftMode, setGiftMode] = useState<string | null>(null);
-  const [giftRecipient, setGiftRecipient] = useState("");
+  const [linkedUsername, setLinkedUsername] = useState<string | null>(null);
+  const [localInputs, setLocalInputs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setLoading(true);
+      fetchCart();
+      fetchLinkedUsername();
+    }
+  }, [isOpen]);
+
+  const fetchLinkedUsername = async () => {
+    try {
+      const res = await fetch("/api/user/linked-account");
+      const data = await res.json();
+      if (data.linked && data.username) {
+        setLinkedUsername(data.username);
+      }
+    } catch (error) {
+      console.error("Failed to fetch linked account:", error);
+    }
+  };
 
   const fetchCart = async () => {
     try {
       const res = await fetch("/api/cart");
       const data = await res.json();
+      // Only initialize local inputs if not already set
+      if (Object.keys(localInputs).length === 0) {
+        const inputs: Record<string, string> = {};
+        data.forEach((item: CartItem) => {
+          inputs[item._id] = item.giftRecipient || linkedUsername || "";
+        });
+        setLocalInputs(inputs);
+      }
       setItems(data);
     } catch (error) {
       console.error("Failed to fetch cart:", error);
@@ -36,12 +87,22 @@ export function CartDrawer() {
     }
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setLoading(true);
-      fetchCart();
-    }
-  }, [isOpen]);
+  const handleUsernameChange = (itemId: string, value: string) => {
+    setLocalInputs(prev => ({ ...prev, [itemId]: value }));
+  };
+
+  const handleUsernameBlur = async (itemId: string) => {
+    const value = localInputs[itemId] || "";
+    await fetch("/api/cart", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemId, giftRecipient: value }),
+    });
+    // Don't re-fetch entire cart, just update items locally
+    setItems(prev => prev.map(item => 
+      item._id === itemId ? { ...item, giftRecipient: value } : item
+    ));
+  };
 
   const updateQuantity = async (itemId: string, quantity: number) => {
     await fetch("/api/cart", {
@@ -49,30 +110,27 @@ export function CartDrawer() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId, quantity }),
     });
-    fetchCart();
+    // Update locally without re-fetching
+    setItems(prev => prev.map(item => 
+      item._id === itemId ? { ...item, quantity } : item
+    ));
     refresh();
-  };
-
-  const updateGiftRecipient = async (itemId: string) => {
-    await fetch("/api/cart", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemId, giftRecipient }),
-    });
-    setGiftMode(null);
-    setGiftRecipient("");
-    fetchCart();
   };
 
   const removeItem = async (itemId: string) => {
     await fetch(`/api/cart?itemId=${itemId}`, { method: "DELETE" });
-    fetchCart();
+    // Update locally without re-fetching
+    setItems(prev => prev.filter(item => item._id !== itemId));
+    const newInputs = { ...localInputs };
+    delete newInputs[itemId];
+    setLocalInputs(newInputs);
     refresh();
   };
 
   const clearCart = async () => {
     await fetch("/api/cart?clear=true", { method: "DELETE" });
     setItems([]);
+    setLocalInputs({});
     refresh();
   };
 
@@ -127,11 +185,23 @@ export function CartDrawer() {
                         />
                       )}
                       <div className="flex-1">
-                        <h3 className="font-bold text-white">{item.product?.name}</h3>
+                        <h3 className="font-bold text-white">{getProductDisplayName(item)}</h3>
                         <p className="text-yellow-400 font-mono">
                           €{((item.product?.price || 0) / 100).toFixed(2)}
                         </p>
                       </div>
+                    </div>
+
+                    <div className="mt-2">
+                      <label className="text-xs text-slate-500">Username (who to grant to)</label>
+                      <input
+                        type="text"
+                        placeholder={linkedUsername || "Enter Hytale username"}
+                        value={localInputs[item._id] || ""}
+                        onChange={(e) => handleUsernameChange(item._id, e.target.value)}
+                        onBlur={() => handleUsernameBlur(item._id)}
+                        className="w-full bg-slate-900 border border-white/10 rounded px-3 py-2 text-white text-sm mt-1"
+                      />
                     </div>
 
                     <div className="flex items-center gap-2 mt-3">
@@ -151,44 +221,12 @@ export function CartDrawer() {
                       </button>
 
                       <button
-                        onClick={() => setGiftMode(item._id)}
-                        className={`ml-auto p-2 rounded ${item.giftRecipient ? 'bg-purple-600' : 'bg-slate-700 hover:bg-slate-600'}`}
-                        title="Gift to friend"
-                      >
-                        <Gift className="w-4 h-4" />
-                      </button>
-                      <button
                         onClick={() => removeItem(item._id)}
-                        className="p-2 bg-red-600/20 text-red-400 rounded hover:bg-red-600/40"
+                        className="ml-auto p-2 bg-red-600/20 text-red-400 rounded hover:bg-red-600/40"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-
-                    {giftMode === item._id && (
-                      <div className="mt-3 flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Hytale username"
-                          value={giftRecipient}
-                          onChange={(e) => setGiftRecipient(e.target.value)}
-                          className="flex-1 bg-slate-900 border border-white/10 rounded px-3 py-2 text-white text-sm"
-                        />
-                        <button
-                          onClick={() => updateGiftRecipient(item._id)}
-                          className="px-3 py-2 bg-purple-600 text-white rounded text-sm"
-                        >
-                          Save
-                        </button>
-                      </div>
-                    )}
-
-                    {item.giftRecipient && giftMode !== item._id && (
-                      <p className="mt-2 text-xs text-purple-400 flex items-center gap-1">
-                        <Gift className="w-3 h-3" />
-                        Gift for: {item.giftRecipient}
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>
@@ -203,18 +241,20 @@ export function CartDrawer() {
                   €{(total / 100).toFixed(2)}
                 </span>
               </div>
-              <button
+              <Button
                 onClick={checkout}
-                className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg"
+                variant="hero"
+                className="w-full"
               >
                 Checkout
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={clearCart}
-                className="w-full mt-2 py-2 text-slate-400 hover:text-red-400 text-sm"
+                variant="destructive"
+                className="w-full mt-2"
               >
                 Clear Cart
-              </button>
+              </Button>
             </div>
           )}
         </div>

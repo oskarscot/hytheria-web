@@ -1,8 +1,73 @@
+"use client";
+
+import { useState } from "react";
 import { getAllProducts } from "@/lib/queries/shop";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { Copy, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export default async function InternalShopPage() {
-  const products = await getAllProducts();
+export default function InternalShopPage() {
+  const router = useRouter();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cloningId, setCloningId] = useState<string | null>(null);
+
+  if (loading) {
+    fetch("/api/shop/products")
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      });
+  }
+
+  const cloneProduct = async (productId: string) => {
+    setCloningId(productId);
+    try {
+      const product = products.find(p => p._id === productId || p._id.$oid === productId);
+      if (!product) return;
+
+      const payload = {
+        name: `${product.name} (Copy)`,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        billingType: product.billingType,
+        durationDays: product.durationDays,
+        subscriptionInterval: product.subscriptionInterval,
+        imageUrl: product.imageUrl,
+        benefits: product.benefits,
+        isActive: false,
+        sortOrder: product.sortOrder + 1,
+      };
+
+      const res = await fetch("/api/shop/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        router.refresh();
+        const newProducts = await fetch("/api/shop/products").then(r => r.json());
+        setProducts(newProducts);
+      }
+    } catch (error) {
+      console.error("Clone failed:", error);
+    } finally {
+      setCloningId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <main className="pt-24 pb-12 px-4">
+          <div className="max-w-6xl mx-auto text-center text-slate-400">Loading...</div>
+        </main>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -31,10 +96,21 @@ export default async function InternalShopPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {products.map((product) => (
-                  <tr key={product._id.toString()} className="hover:bg-slate-800/50">
+                  <tr key={product._id?.$oid || product._id} className="hover:bg-slate-800/50">
                     <td className="px-6 py-4">
-                      <div className="text-white font-bold">{product.name}</div>
-                      <div className="text-slate-500 text-sm">{product.description}</div>
+                      <div className="flex items-center gap-3">
+                        {product.imageUrl && (
+                          <img 
+                            src={product.imageUrl} 
+                            alt={product.name} 
+                            className="w-12 h-12 object-cover rounded-lg"
+                          />
+                        )}
+                        <div>
+                          <div className="text-white font-bold">{product.name}</div>
+                          <div className="text-slate-500 text-sm">{product.description}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
@@ -58,9 +134,21 @@ export default async function InternalShopPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => cloneProduct(product._id?.$oid || product._id)}
+                        disabled={cloningId === (product._id?.$oid || product._id)}
+                        className="text-blue-400 hover:text-blue-300 mr-4 disabled:opacity-50"
+                        title="Clone"
+                      >
+                        {cloningId === (product._id?.$oid || product._id) ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
                       <a 
-                        href={`/internal/shop/${product._id.toString()}/edit`}
-                        className="text-yellow-500 hover:text-yellow-400 mr-4"
+                        href={`/internal/shop/${product._id?.$oid || product._id}/edit`}
+                        className="text-yellow-500 hover:text-yellow-400"
                       >
                         Edit
                       </a>

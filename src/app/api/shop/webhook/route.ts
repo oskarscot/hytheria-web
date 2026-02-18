@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
-import { updateOrderStatus, getOrderBySessionId, createOrder } from "@/lib/queries/orders";
 import { getProductById } from "@/lib/queries/shop";
+import { createPendingPurchase } from "@/lib/queries/shop-pending";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -25,49 +25,66 @@ export async function POST(request: Request) {
     const cartData = session.metadata?.cart ? JSON.parse(session.metadata.cart) : null;
 
     if (cartData && cartData.length > 0) {
-      // Handle cart checkout (multiple items)
       for (const item of cartData) {
         const product = await getProductById(item.productId);
-        const itemAmount = product ? product.price * item.quantity : 0;
+        if (!product) continue;
 
-        await createOrder({
+        const isGift = !!item.giftRecipient;
+        const recipient = item.giftRecipient || session.metadata?.userId || "self";
+        
+        const billingType = product.billingType || "one_time";
+        const durationDays = billingType === "lifetime" 
+          ? undefined 
+          : billingType === "subscription"
+            ? product.subscriptionInterval === "year" ? 365 : 30
+            : (product.durationDays || 30);
+
+        await createPendingPurchase({
           oderId: `ord_${Date.now()}_${item.productId}`,
           userId: session.metadata?.userId || undefined,
-          productId: item.productId,
           stripeSessionId: session.id,
-          amount: itemAmount,
-          status: "completed",
-          giftRecipient: item.giftRecipient || undefined,
+          productId: item.productId,
+          productName: product.name,
+          productCategory: product.category,
+          billingType,
+          durationDays,
+          recipientUsername: recipient,
+          isGift,
+          amount: product.price * item.quantity,
+          status: "pending",
         });
-
-        if (product) {
-          console.log("Granting purchase:", {
-            product: product.name,
-            recipient: item.giftRecipient || "self",
-            billingType: product.billingType,
-          });
-        }
       }
     } else {
-      // Handle single product checkout (legacy)
-      await updateOrderStatus(session.id, "completed");
-
-      const order = await getOrderBySessionId(session.id);
-      if (order) {
-        const product = await getProductById(order.productId);
+      const productId = session.metadata?.productId;
+      if (productId) {
+        const product = await getProductById(productId);
         if (product) {
-          console.log("Granting purchase:", {
-            product: product.name,
-            billingType: product.billingType,
+          const billingType = product.billingType || "one_time";
+          const durationDays = billingType === "lifetime" 
+            ? undefined 
+            : billingType === "subscription"
+              ? product.subscriptionInterval === "year" ? 365 : 30
+              : (product.durationDays || 30);
+
+          await createPendingPurchase({
+            oderId: `ord_${Date.now()}`,
+            userId: session.metadata?.userId || undefined,
+            stripeSessionId: session.id,
+            productId: product._id.toString(),
+            productName: product.name,
+            productCategory: product.category,
+            billingType,
+            durationDays,
+            recipientUsername: "self",
+            isGift: false,
+            amount: product.price,
+            status: "pending",
           });
         }
       }
     }
-  }
 
-  if (event.type === "checkout.session.expired") {
-    const session = event.data.object;
-    await updateOrderStatus(session.id, "failed");
+    console.log("Created pending purchases for session:", session.id);
   }
 
   return NextResponse.json({ received: true });

@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 
 export type ProductCategory = "rank" | "item";
 export type RankBillingType = "one_time" | "subscription" | "lifetime";
+export type SubscriptionInterval = "month" | "year";
 
 export interface ShopProduct {
   _id: ObjectId;
@@ -11,6 +12,8 @@ export interface ShopProduct {
   price: number;
   category: ProductCategory;
   billingType?: RankBillingType;
+  durationDays?: number;
+  subscriptionInterval?: SubscriptionInterval;
   imageUrl?: string;
   benefits: string[];
   isActive: boolean;

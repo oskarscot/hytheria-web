@@ -14,6 +14,8 @@ export default function NewProductPage() {
     price: "",
     category: "item",
     billingType: "one_time",
+    durationDays: "30",
+    subscriptionInterval: "month",
     imageUrl: "",
     benefits: "",
     isActive: true,
@@ -38,6 +40,11 @@ export default function NewProductPage() {
 
       if (formData.category === "rank") {
         payload.billingType = formData.billingType;
+        if (formData.billingType === "one_time") {
+          payload.durationDays = parseInt(formData.durationDays) || 30;
+        } else if (formData.billingType === "subscription") {
+          payload.subscriptionInterval = formData.subscriptionInterval;
+        }
       }
 
       const res = await fetch("/api/shop/products", {
@@ -117,18 +124,47 @@ export default function NewProductPage() {
             </div>
 
             {formData.category === "rank" && (
-              <div>
-                <label className="block text-sm text-slate-400 mb-2">Billing Type</label>
-                <select
-                  value={formData.billingType}
-                  onChange={(e) => setFormData({ ...formData, billingType: e.target.value })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-500"
-                >
-                  <option value="one_time">One-time</option>
-                  <option value="subscription">Subscription</option>
-                  <option value="lifetime">Lifetime</option>
-                </select>
-              </div>
+              <>
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">Billing Type</label>
+                  <select
+                    value={formData.billingType}
+                    onChange={(e) => setFormData({ ...formData, billingType: e.target.value })}
+                    className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-500"
+                  >
+                    <option value="one_time">One-time</option>
+                    <option value="subscription">Subscription</option>
+                    <option value="lifetime">Lifetime</option>
+                  </select>
+                </div>
+
+                {formData.billingType === "one_time" && (
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">Duration (days)</label>
+                    <input
+                      type="number"
+                      value={formData.durationDays}
+                      onChange={(e) => setFormData({ ...formData, durationDays: e.target.value })}
+                      className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-500"
+                      placeholder="30"
+                    />
+                  </div>
+                )}
+
+                {formData.billingType === "subscription" && (
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">Billing Interval</label>
+                    <select
+                      value={formData.subscriptionInterval}
+                      onChange={(e) => setFormData({ ...formData, subscriptionInterval: e.target.value })}
+                      className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-500"
+                    >
+                      <option value="month">Monthly</option>
+                      <option value="year">Yearly</option>
+                    </select>
+                  </div>
+                )}
+              </>
             )}
 
             <div>

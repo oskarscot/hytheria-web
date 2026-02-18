@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getCartBySession, addToCart, removeFromCart, updateCartItem, clearCart } from "@/lib/queries/cart";
 import { getProductById } from "@/lib/queries/shop";
+import { getLinkedAccountWithPlayer } from "@/lib/queries/linked-accounts";
 
 async function getSessionId(): Promise<string> {
   const h = await headers();
@@ -14,6 +15,12 @@ export async function GET() {
   const sessionId = await getSessionId();
   const userId = session?.user?.id;
 
+  let linkedUsername: string | null = null;
+  if (userId) {
+    const linked = await getLinkedAccountWithPlayer(userId);
+    linkedUsername = linked?.player?.lastKnownName || null;
+  }
+
   const items = await getCartBySession(sessionId, userId);
   
   const itemsWithProducts = await Promise.all(
@@ -22,6 +29,7 @@ export async function GET() {
       return {
         ...item,
         product,
+        recipientUsername: item.giftRecipient || linkedUsername,
       };
     })
   );
@@ -57,7 +65,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const sessionId = getSessionId();
+  const sessionId = await getSessionId();
   const userId = session?.user?.id;
 
   try {
