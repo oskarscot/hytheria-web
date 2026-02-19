@@ -112,7 +112,7 @@ export default function ToSPage() {
             <section>
               <h2 className="text-xl font-display font-bold text-yellow-400 mb-4">9. Privacy</h2>
               <p className="leading-relaxed font-light">
-                We collect and process personal data in accordance with applicable data protection laws, including the UK General Data Protection Regulation (UK GDPR). By using the Service, you consent to the collection and use of information as described in our <a href="/privacy-policy" className="text-yellow-500 hover:underline">Privacy Policy</a>. If we do not have a separate Privacy Policy published, the following applies: we collect only the data necessary to operate the Service (such as account details and transaction records), we do not sell your data to third parties, and you may request deletion of your data by contacting us.
+                We collect and process personal data in accordance with applicable data protection laws, including the UK General Data Protection Regulation (UK GDPR). By using the Service, you consent to the collection and use of information as described in our <a href="/privacy-policy" className="text-yellow-500 hover:underline">Privacy Policy</a>.  We do not sell your data to third parties, and you may request deletion of your data by contacting us.
               </p>
             </section>
 
