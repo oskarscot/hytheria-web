@@ -15,7 +15,7 @@ export default async function DashboardSettingsPage() {
     <section>
       <h2 className="text-2xl font-semibold">Settings</h2>
       <p className="mt-4 text-slate-600">
-        fkahfkafka
+        Work in progress.
       </p>
     </section>
   );

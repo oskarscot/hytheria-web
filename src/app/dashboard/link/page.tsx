@@ -27,7 +27,7 @@ export default async function DashboardLinkPage() {
            <div className="space-y-2 text-sm text-slate-400">
               <p>To access the dashboard, you must link your Discord account to your in-game player profile.</p>
               <ol className="list-decimal pl-4 space-y-1 text-slate-300">
-                 <li>Join the Hytheria server: <span className="text-yellow-500 font-mono">play.hytheria.com</span></li>
+                 <li>Join the Hytheria server: <span className="text-yellow-500 font-mono">play.hytheria.gg</span></li>
                  <li>Type <span className="bg-slate-800 px-1 py-0.5 rounded font-mono text-yellow-200">/link</span> in chat</li>
                  <li>Enter the 6-character code below</li>
               </ol>
