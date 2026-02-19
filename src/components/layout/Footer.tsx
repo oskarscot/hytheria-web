@@ -1,5 +1,6 @@
 import * as React from "react"
 import Image from "next/image"
+import Link from "next/link"
 
 export function Footer() {
   return (
@@ -16,6 +17,11 @@ export function Footer() {
               fill
             />
           </div>
+        </div>
+        <div className="flex justify-center gap-6 mb-4">
+          <Link href="/tos" className="text-slate-500 hover:text-yellow-500 text-sm transition-colors">Terms of Service</Link>
+          <Link href="/privacy-policy" className="text-slate-500 hover:text-yellow-500 text-sm transition-colors">Privacy Policy</Link>
+          <Link href="/server-rules" className="text-slate-500 hover:text-yellow-500 text-sm transition-colors">Server Rules</Link>
         </div>
         <p className="text-slate-500 text-sm font-mono tracking-widest uppercase mb-4">
           &copy; 2026 Hytheria Network

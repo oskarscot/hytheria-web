@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/Button";
@@ -65,7 +66,7 @@ export default function LoginPage() {
 
                 <div className="mt-8 pt-6 border-t border-white/5 text-center">
                     <p className="text-xs text-slate-500">
-                        By signing in, you agree to our <a href="#" className="text-yellow-500 hover:underline">Terms of Service</a> and <a href="#" className="text-yellow-500 hover:underline">Privacy Policy</a>.
+                        By signing in, you agree to our <Link href="/tos" className="text-yellow-500 hover:underline">Terms of Service</Link> and <Link href="/privacy-policy" className="text-yellow-500 hover:underline">Privacy Policy</Link>.
                     </p>
                 </div>
             </Card>
