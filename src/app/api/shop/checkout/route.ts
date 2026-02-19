@@ -79,6 +79,10 @@ export async function POST(request: Request) {
         ({ product }) => product?.category === "rank" && product?.billingType === "subscription"
       );
 
+      if (hasSubscription && !userId) {
+        return NextResponse.json({ error: "Login required for subscriptions" }, { status: 400 });
+      }
+
       const checkoutSession = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: lineItems as any,
@@ -128,7 +132,11 @@ export async function POST(request: Request) {
     }
 
     const isSubscription = product.category === "rank" && product.billingType === "subscription";
-    
+
+    if (isSubscription && !userId) {
+      return NextResponse.json({ error: "Login required for subscriptions" }, { status: 400 });
+    }
+
     const lineItem: any = {
       price_data: {
         currency: "eur",

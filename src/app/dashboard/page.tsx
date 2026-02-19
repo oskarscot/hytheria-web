@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth";
 import { getLinkedAccountWithPlayer } from "@/lib/queries/linked-accounts";
 import { getPlayerStats, getPlayerSkills } from "@/lib/queries/player";
 import { getIslandInfo } from "@/lib/queries/island";
-import { getQuestProgress } from "@/lib/queries/quests";
 import { getPlayerRank } from "@/lib/queries/rank";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
@@ -22,11 +21,10 @@ export default async function DashboardPage() {
   const playerUuid = linkedAccount.linkedAccount.playerUuid;
   const playerName = linkedAccount.player?.lastKnownName;
   
-  const [playerStats, playerSkills, islandInfo, questProgress, playerRank] = await Promise.all([
+  const [playerStats, playerSkills, islandInfo, playerRank]: [any, any, any, any] = await Promise.all([
     getPlayerStats(playerUuid),
     getPlayerSkills(playerUuid),
     getIslandInfo(playerUuid),
-    getQuestProgress(playerUuid),
     playerName ? getPlayerRank(playerName) : Promise.resolve(null)
   ]);
 
@@ -35,10 +33,30 @@ export default async function DashboardPage() {
     return num.toLocaleString();
   };
 
-  const getSkillLevel = (xp: number | undefined) => {
-    if (!xp) return "1";
-    const level = Math.floor(Math.sqrt(xp / 100)) + 1;
-    return level.toString();
+  const getXpForLevel = (level: number): number => {
+    if (level <= 0) return 0;
+    return Math.floor(500 * Math.pow(level, 2.2));
+  };
+
+  const getSkillLevel = (xp: number | undefined): number => {
+    if (!xp || xp <= 0) return 0;
+    let level = 0;
+    let xpNeeded = 0;
+    while (xpNeeded <= xp && level < 50) {
+      level++;
+      xpNeeded += getXpForLevel(level);
+    }
+    return Math.max(0, level - 1);
+  };
+
+  const getXpProgress = (xp: number | undefined): { current: number; needed: number; percent: number } => {
+    if (!xp || xp <= 0) return { current: 0, needed: 500, percent: 0 };
+    const level = getSkillLevel(xp);
+    const xpForNextLevel = getXpForLevel(level + 1);
+    const totalXpForCurrentLevel = Array.from({ length: level }, (_, i) => getXpForLevel(i + 1)).reduce((a, b) => a + b, 0);
+    const currentLevelXp = xp - totalXpForCurrentLevel;
+    const percent = Math.min(100, (currentLevelXp / xpForNextLevel) * 100);
+    return { current: currentLevelXp, needed: xpForNextLevel, percent };
   };
 
   return (
@@ -61,7 +79,7 @@ export default async function DashboardPage() {
         <StatsCard 
           title="Balance" 
           value={formatNumber(playerStats?.coins ?? islandInfo?.bankBalance)} 
-          subtitle="Gold Coins"
+          subtitle="coins"
           icon={Coins} 
         />
         <StatsCard 
@@ -69,18 +87,21 @@ export default async function DashboardPage() {
           value={`Lvl ${getSkillLevel(playerSkills?.skillXp?.COMBAT)}`} 
           subtitle="Combat XP"
           icon={Swords} 
+          progress={getXpProgress(playerSkills?.skillXp?.COMBAT).percent}
         />
         <StatsCard 
           title="Mining" 
           value={`Lvl ${getSkillLevel(playerSkills?.skillXp?.MINING)}`} 
           subtitle="Mining XP"
           icon={Pickaxe} 
+          progress={getXpProgress(playerSkills?.skillXp?.MINING).percent}
         />
         <StatsCard 
           title="Farming" 
           value={`Lvl ${getSkillLevel(playerSkills?.skillXp?.FARMING)}`} 
           subtitle="Farming XP"
           icon={TrendingUp} 
+          progress={getXpProgress(playerSkills?.skillXp?.FARMING).percent}
         />
       </div>
 
@@ -91,36 +112,8 @@ export default async function DashboardPage() {
             <RecentActivity />
         </div>
 
-        {/* Active Quest */}
+        {/* Island Stats */}
         <div className="lg:col-span-1 space-y-6">
-           <div className="p-6 rounded-xl bg-gradient-to-br from-yellow-900/20 to-slate-900/40 border border-yellow-500/20 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-              <div className="relative z-10">
-                 <h3 className="text-lg font-display font-bold text-yellow-100 mb-2">Active Quest</h3>
-                 
-                 {questProgress?.activeQuestId ? (
-                   <>
-                     <div className="mb-4">
-                        <p className="text-sm font-bold text-white">Quest ID: {questProgress.activeQuestId}</p>
-                        <p className="text-xs text-slate-400 italic">Main Questline</p>
-                     </div>
-                     
-                     <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-2 border border-white/5">
-                        <div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 w-full shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
-                     </div>
-                     <div className="flex justify-between text-xs text-slate-500 font-mono uppercase tracking-wider">
-                        <span>In Progress</span>
-                     </div>
-                   </>
-                 ) : (
-                   <div className="text-sm text-slate-400">
-                      No active quest. Visit the Town Hall to begin your adventure.
-                   </div>
-                 )}
-              </div>
-           </div>
-
-           {/* Island Stats */}
            {islandInfo && (
              <div className="p-6 rounded-xl bg-slate-900/40 border border-white/5">
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Island Stats</h3>

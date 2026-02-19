@@ -8,22 +8,25 @@ import { CartButton } from "@/components/shop/BuyButton";
 interface PageLayoutProps {
   children: React.ReactNode;
   active?: string;
+  hideNavbar?: boolean;
 }
 
-export function PageLayout({ children, active }: PageLayoutProps) {
+export function PageLayout({ children, active, hideNavbar }: PageLayoutProps) {
   return (
     <CartProvider>
       <div className="min-h-screen bg-[#0B0E14] text-white selection:bg-yellow-500/30 selection:text-yellow-100 font-sans flex flex-col">
-        <Navbar>
-          <div className="flex items-center gap-4">
-            <CartButton />
-            <NavbarAuth />
-          </div>
-        </Navbar>
+        {!hideNavbar && (
+          <Navbar>
+            <div className="flex items-center gap-4">
+              <CartButton />
+              <NavbarAuth />
+            </div>
+          </Navbar>
+        )}
 
         {children}
 
-        <Footer />
+        {!hideNavbar && <Footer />}
       </div>
 
       <CartDrawer />

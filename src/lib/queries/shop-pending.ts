@@ -111,3 +111,11 @@ export async function getActiveSubscriptionsByUserId(userId: string): Promise<Ac
     .find({ userId, status: "active" })
     .toArray();
 }
+
+export async function getPurchasesByUserId(userId: string): Promise<PendingPurchase[]> {
+  const db = await getDatabase();
+  return db.collection<PendingPurchase>("shop_pending")
+    .find({ userId })
+    .sort({ createdAt: -1 })
+    .toArray();
+}

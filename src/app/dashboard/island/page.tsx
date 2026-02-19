@@ -72,8 +72,7 @@ export default async function DashboardIslandPage() {
            <div className="p-6 rounded-xl bg-slate-900/40 border border-white/5 hover:border-yellow-500/30 transition-all group">
               <Coins className="w-8 h-8 text-slate-600 group-hover:text-yellow-500 mb-4 transition-colors" />
               <h3 className="text-xl font-bold text-white mb-2">Bank</h3>
-              <div className="text-2xl font-mono text-yellow-400 font-bold mb-1">{islandInfo.bankBalance?.toLocaleString() || 0}g</div>
-              <p className="text-slate-500 text-xs">Interest Rate: 2.5%</p>
+              <div className="text-2xl font-mono text-yellow-400 font-bold mb-1">{islandInfo.bankBalance?.toLocaleString() || 0} coins</div>
            </div>
 
            {/* Minions */}
@@ -84,8 +83,8 @@ export default async function DashboardIslandPage() {
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                  {islandInfo.minions?.slice(0, 8).map((minion, i) => (
                     <div key={i} className="aspect-square bg-slate-800 rounded flex flex-col items-center justify-center text-xs text-slate-500 border border-white/5">
-                       <span className="text-yellow-500 font-bold">{minion.tier}</span>
-                       <span className="text-[10px]">{minion.type.slice(0,3)}</span>
+                       <span className="text-yellow-500 font-bold text-[10px]">{minion.type} Minion</span>
+                       <span className="text-slate-300">Tier {minion.tier}</span>
                     </div>
                  ))}
                  {(!islandInfo.minions || islandInfo.minions.length === 0) && (

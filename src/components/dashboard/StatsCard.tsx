@@ -6,9 +6,10 @@ interface StatsCardProps {
   value: string
   icon: LucideIcon
   subtitle?: string
+  progress?: number
 }
 
-export function StatsCard({ title, value, icon: Icon, subtitle }: StatsCardProps) {
+export function StatsCard({ title, value, icon: Icon, subtitle, progress }: StatsCardProps) {
   return (
     <Card className="bg-slate-900/40 border border-white/5 hover:border-yellow-500/30 transition-all duration-300 backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -20,11 +21,22 @@ export function StatsCard({ title, value, icon: Icon, subtitle }: StatsCardProps
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold font-display text-white tracking-wide">{value}</div>
+        <div className="text-2xl font-bold font-serif text-white tracking-wide">{value}</div>
         {subtitle && (
           <p className="text-xs text-slate-500 mt-1 font-serif italic">
             {subtitle}
           </p>
+        )}
+        {progress !== undefined && (
+          <div className="mt-2">
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 shadow-[0_0_6px_rgba(234,179,8,0.5)]" 
+                style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} 
+              />
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1 font-mono">{progress.toFixed(1)}% to next level</p>
+          </div>
         )}
       </CardContent>
     </Card>

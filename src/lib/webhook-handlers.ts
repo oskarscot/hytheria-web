@@ -60,6 +60,13 @@ export async function handleCheckoutCompleted(session: any) {
       if (isSubscription && session.subscription) {
         const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as any;
         
+        const periodStart = subscription.current_period_start 
+          ? new Date(subscription.current_period_start * 1000)
+          : new Date();
+        const periodEnd = subscription.current_period_end 
+          ? new Date(subscription.current_period_end * 1000)
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
         await createActiveSubscription({
           orderId: `ord_${Date.now()}_${item.productId}`,
           userId,
@@ -72,8 +79,8 @@ export async function handleCheckoutCompleted(session: any) {
           recipientUsername: recipient,
           isGift,
           status: subscription.status as any,
-          currentPeriodStart: new Date(subscription.current_period_start * 1000),
-          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          currentPeriodStart: periodStart,
+          currentPeriodEnd: periodEnd,
         });
       } else {
         await createPendingPurchase({
@@ -112,6 +119,13 @@ export async function handleCheckoutCompleted(session: any) {
         if (isSubscription && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as any;
           
+          const periodStart = subscription.current_period_start 
+            ? new Date(subscription.current_period_start * 1000)
+            : new Date();
+          const periodEnd = subscription.current_period_end 
+            ? new Date(subscription.current_period_end * 1000)
+            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
           await createActiveSubscription({
             orderId: `ord_${Date.now()}`,
             userId,
@@ -124,8 +138,8 @@ export async function handleCheckoutCompleted(session: any) {
             recipientUsername: defaultUsername || "self",
             isGift: false,
             status: subscription.status as any,
-            currentPeriodStart: new Date(subscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            currentPeriodStart: periodStart,
+            currentPeriodEnd: periodEnd,
           });
         } else {
           await createPendingPurchase({
@@ -160,12 +174,26 @@ export async function handleInvoicePaid(invoice: any) {
   const existing = await getActiveSubscriptionByStripeId(subscription.id);
   
   if (existing) {
+    const periodStart = subscription.current_period_start 
+      ? new Date(subscription.current_period_start * 1000)
+      : new Date();
+    const periodEnd = subscription.current_period_end 
+      ? new Date(subscription.current_period_end * 1000)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
     await updateActiveSubscription(subscription.id, {
       status: subscription.status as any,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEnd,
     });
   } else {
+    const periodStart = subscription.current_period_start 
+      ? new Date(subscription.current_period_start * 1000)
+      : new Date();
+    const periodEnd = subscription.current_period_end 
+      ? new Date(subscription.current_period_end * 1000)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
     await createActiveSubscription({
       orderId: `inv_${invoice.id}`,
       stripeSubscriptionId: subscription.id,
@@ -176,8 +204,8 @@ export async function handleInvoicePaid(invoice: any) {
       recipientUsername: "self",
       isGift: false,
       status: subscription.status as any,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEnd,
     });
   }
 
@@ -188,10 +216,17 @@ export async function handleSubscriptionUpdated(subscription: any) {
   const existing = await getActiveSubscriptionByStripeId(subscription.id);
   
   if (existing) {
+    const periodStart = subscription.current_period_start 
+      ? new Date(subscription.current_period_start * 1000)
+      : new Date();
+    const periodEnd = subscription.current_period_end 
+      ? new Date(subscription.current_period_end * 1000)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
     const updates: any = {
       status: subscription.status as any,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEnd,
     };
 
     if (subscription.cancel_at_period_end) {

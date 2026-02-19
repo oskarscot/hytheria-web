@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Swords, Map, Link2, Settings } from "lucide-react"
+import { LayoutDashboard, Map, Link2, Settings, Receipt } from "lucide-react"
 
 interface DashboardNavProps {
   isLinked: boolean
@@ -14,8 +14,8 @@ export function DashboardNav({ isLinked }: DashboardNavProps) {
 
   const navItems = [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-    { href: "/dashboard/quests", label: "Quests", icon: Swords },
     { href: "/dashboard/island", label: "Island", icon: Map },
+    { href: "/dashboard/payments", label: "Payments", icon: Receipt },
     ...(isLinked ? [] : [{ href: "/dashboard/link", label: "Link Account", icon: Link2 }] as const),
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ]
