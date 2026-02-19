@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { createLinkedAccountByCode } from "@/lib/queries/linked-accounts";
+import { createLinkedAccountByCode, getDiscordAccountId } from "@/lib/queries/linked-accounts";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
 const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
@@ -33,7 +33,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const linkedAccount = await createLinkedAccountByCode(session.user?.id ?? "", code);
+  const discordId = await getDiscordAccountId(session.user?.id ?? "");
+  if (!discordId) {
+    return NextResponse.json({ error: "No Discord account linked" }, { status: 400 });
+  }
+
+  const linkedAccount = await createLinkedAccountByCode(session.user?.id ?? "", discordId, code);
 
   if (!linkedAccount) {
     return NextResponse.json({ error: "Invalid or expired code" }, { status: 400 });

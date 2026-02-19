@@ -56,14 +56,35 @@ export async function addToCart(
   }
 }
 
+export async function getCartItemBySession(
+  itemId: string,
+  sessionId: string,
+  userId?: string
+): Promise<CartItem | null> {
+  const db = await getDatabase();
+  const query = userId
+    ? { _id: new ObjectId(itemId), $or: [{ sessionId }, { userId }] }
+    : { _id: new ObjectId(itemId), sessionId };
+  return db.collection<CartItem>("cart").findOne(query);
+}
+
 export async function updateCartItem(
   itemId: string,
   updates: { quantity?: number; giftRecipient?: string }
 ): Promise<void> {
   const db = await getDatabase();
+  const setFields: Record<string, any> = { updatedAt: new Date() };
+  
+  if (updates.quantity !== undefined) {
+    setFields.quantity = updates.quantity;
+  }
+  if (updates.giftRecipient !== undefined) {
+    setFields.giftRecipient = updates.giftRecipient;
+  }
+
   await db.collection("cart").updateOne(
     { _id: new ObjectId(itemId) },
-    { $set: { ...updates, updatedAt: new Date() } }
+    { $set: setFields }
   );
 }
 

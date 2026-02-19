@@ -46,6 +46,7 @@ export function CartDrawer() {
   const [loading, setLoading] = useState(true);
   const [linkedUsername, setLinkedUsername] = useState<string | null>(null);
   const [localInputs, setLocalInputs] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -89,6 +90,9 @@ export function CartDrawer() {
 
   const handleUsernameChange = (itemId: string, value: string) => {
     setLocalInputs(prev => ({ ...prev, [itemId]: value }));
+    if (value.trim()) {
+      setErrors(prev => ({ ...prev, [itemId]: "" }));
+    }
   };
 
   const handleUsernameBlur = async (itemId: string) => {
@@ -98,19 +102,18 @@ export function CartDrawer() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId, giftRecipient: value }),
     });
-    // Don't re-fetch entire cart, just update items locally
     setItems(prev => prev.map(item => 
       item._id === itemId ? { ...item, giftRecipient: value } : item
     ));
   };
 
   const updateQuantity = async (itemId: string, quantity: number) => {
+    if (quantity < 1 || quantity > 100) return;
     await fetch("/api/cart", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId, quantity }),
     });
-    // Update locally without re-fetching
     setItems(prev => prev.map(item => 
       item._id === itemId ? { ...item, quantity } : item
     ));
@@ -135,14 +138,34 @@ export function CartDrawer() {
   };
 
   const checkout = async () => {
-    const res = await fetch("/api/shop/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cart: items }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
+    const newErrors: Record<string, string> = {};
+    
+    for (const item of items) {
+      const username = localInputs[item._id]?.trim();
+      if (!username && !linkedUsername) {
+        newErrors[item._id] = "Username required";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/shop/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart: items }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error) {
+        window.location.href = `/store/checkout/result?type=error&message=${encodeURIComponent(data.error)}`;
+      }
+    } catch (error) {
+      window.location.href = "/store/checkout/result?type=error";
     }
   };
 
@@ -200,8 +223,13 @@ export function CartDrawer() {
                         value={localInputs[item._id] || ""}
                         onChange={(e) => handleUsernameChange(item._id, e.target.value)}
                         onBlur={() => handleUsernameBlur(item._id)}
-                        className="w-full bg-slate-900 border border-white/10 rounded px-3 py-2 text-white text-sm mt-1"
+                        className={`w-full bg-slate-900 border rounded px-3 py-2 text-white text-sm mt-1 ${
+                          errors[item._id] ? "border-red-500" : "border-white/10"
+                        }`}
                       />
+                      {errors[item._id] && (
+                        <p className="text-red-400 text-xs mt-1">{errors[item._id]}</p>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 mt-3">

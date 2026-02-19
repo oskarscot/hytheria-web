@@ -5,7 +5,7 @@ export type OrderStatus = "pending" | "completed" | "failed" | "refunded";
 
 export interface ShopOrder {
   _id: ObjectId;
-  oderId: string;
+  orderId: string;
   userId?: string;
   playerUuid?: string;
   productId: string;

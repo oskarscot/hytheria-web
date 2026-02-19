@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { getLinkedAccountByDiscordId } from "@/lib/queries/linked-accounts";
+import { getLinkedAccountByUserId } from "@/lib/queries/linked-accounts";
 
 export default async function DashboardSettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const linkedAccount = await getLinkedAccountByDiscordId(session?.user?.id ?? "");
+  const linkedAccount = await getLinkedAccountByUserId(session?.user?.id ?? "");
 
   if (!linkedAccount) {
     redirect("/dashboard/link");

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { getLinkedAccountByDiscordId } from "@/lib/queries/linked-accounts";
+import { getLinkedAccountByUserId } from "@/lib/queries/linked-accounts";
 import { getIslandInfo } from "@/lib/queries/island";
 
 export async function GET(
@@ -15,7 +15,7 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const linkedAccount = await getLinkedAccountByDiscordId(session.user?.id ?? "");
+  const linkedAccount = await getLinkedAccountByUserId(session.user?.id ?? "");
 
   if (!linkedAccount) {
     return NextResponse.json({ error: "Account not linked" }, { status: 403 });

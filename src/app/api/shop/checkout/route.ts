@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getProductById } from "@/lib/queries/shop";
 import { createOrder } from "@/lib/queries/orders";
-import { clearCart } from "@/lib/queries/cart";
+import { clearCart, getCartBySession } from "@/lib/queries/cart";
+import { getLinkedAccountWithPlayer } from "@/lib/queries/linked-accounts";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 
@@ -22,54 +23,79 @@ export async function POST(request: Request) {
 
     // Handle cart checkout
     if (cart && cart.length > 0) {
-      const lineItems = cart.map((item: any) => ({
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: item.product?.name || "Product",
-            description: item.product?.description || "",
-          },
-          unit_amount: item.product?.price || 0,
-        },
-        quantity: item.quantity,
-      }));
+      const cartItems = await getCartBySession(sessionId, userId);
+      if (cartItems.length === 0) {
+        return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+      }
 
-      const total = cart.reduce(
-        (sum: number, item: any) => sum + (item.product?.price || 0) * item.quantity,
-        0
+      const itemsWithProducts = await Promise.all(
+        cartItems.map(async (item) => ({
+          item,
+          product: await getProductById(item.productId),
+        }))
       );
 
-      const hasSubscription = cart.some(
-        (item: any) => item.product?.category === "rank" && item.product?.billingType === "subscription"
+      if (itemsWithProducts.some(({ product }) => !product)) {
+        return NextResponse.json({ error: "Invalid cart item" }, { status: 400 });
+      }
+
+      const linked = userId ? await getLinkedAccountWithPlayer(userId) : null;
+      const defaultRecipient = linked?.player?.lastKnownName;
+
+      if (cartItems.some((item) => !(item.giftRecipient || defaultRecipient))) {
+        return NextResponse.json({ error: "Recipient username required" }, { status: 400 });
+      }
+
+      const lineItems = itemsWithProducts.map(({ item, product }) => {
+        const quantity = Number(item.quantity);
+        return {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: product?.name || "Product",
+              description: product?.description || "",
+            },
+            unit_amount: product?.price || 0,
+          },
+          quantity,
+        };
+      });
+
+      if (lineItems.some((item) => !Number.isInteger(item.quantity) || item.quantity < 1)) {
+        return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
+      }
+
+      const hasSubscription = itemsWithProducts.some(
+        ({ product }) => product?.category === "rank" && product?.billingType === "subscription"
       );
 
       const checkoutSession = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: lineItems as any,
         mode: hasSubscription ? "subscription" : "payment",
-        success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store?success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store?canceled=true`,
+        success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store/checkout/result?type=success`,
+        cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store/checkout/result?type=canceled`,
         metadata: {
           userId: userId ?? "",
           sessionId,
           cart: JSON.stringify(
-            cart.map((item: any) => ({
+            cartItems.map((item) => ({
               productId: item.productId,
               quantity: item.quantity,
-              giftRecipient: item.giftRecipient || null,
+              giftRecipient: item.giftRecipient || defaultRecipient,
             }))
           ),
         },
       });
 
       // Create order for each item
-      for (const item of cart) {
+      for (const { item, product } of itemsWithProducts) {
         await createOrder({
-          oderId: `ord_${Date.now()}_${item.productId}`,
+          orderId: `ord_${Date.now()}_${item.productId}`,
           userId,
           productId: item.productId,
           stripeSessionId: checkoutSession.id,
-          amount: (item.product?.price || 0) * item.quantity,
+          amount: (product?.price || 0) * item.quantity,
           status: "pending",
         });
       }
@@ -116,7 +142,7 @@ export async function POST(request: Request) {
     });
 
     await createOrder({
-      oderId: `ord_${Date.now()}`,
+      orderId: `ord_${Date.now()}`,
       userId,
       productId: product._id.toString(),
       stripeSessionId: checkoutSession.id,
@@ -127,6 +153,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to create checkout session";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { getCartBySession, addToCart, removeFromCart, updateCartItem, clearCart } from "@/lib/queries/cart";
+import { getCartBySession, addToCart, removeFromCart, updateCartItem, clearCart, getCartItemBySession } from "@/lib/queries/cart";
 import { getProductById } from "@/lib/queries/shop";
 import { getLinkedAccountWithPlayer } from "@/lib/queries/linked-accounts";
 
@@ -75,6 +75,11 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Item ID required" }, { status: 400 });
     }
 
+    const item = await getCartItemBySession(itemId, sessionId, userId);
+    if (!item) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     await updateCartItem(itemId, { quantity, giftRecipient });
 
     return NextResponse.json({ success: true });
@@ -97,6 +102,10 @@ export async function DELETE(request: Request) {
     if (clear === "true") {
       await clearCart(sessionId, userId);
     } else if (itemId) {
+      const item = await getCartItemBySession(itemId, sessionId, userId);
+      if (!item) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
       await removeFromCart(itemId);
     } else {
       return NextResponse.json({ error: "Item ID or clear required" }, { status: 400 });

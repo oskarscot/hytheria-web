@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
-import { getProductById } from "@/lib/queries/shop";
-import { createPendingPurchase } from "@/lib/queries/shop-pending";
+import { handleCheckoutCompleted, handleCheckoutFailed, handleCheckoutExpired, handleChargeRefunded, handleInvoicePaid, handleSubscriptionUpdated, handleSubscriptionDeleted, handleInvoicePaymentFailed } from "@/lib/webhook-handlers";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -19,72 +18,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    
-    const cartData = session.metadata?.cart ? JSON.parse(session.metadata.cart) : null;
+  switch (event.type) {
+    case "checkout.session.completed":
+      await handleCheckoutCompleted(event.data.object);
+      break;
 
-    if (cartData && cartData.length > 0) {
-      for (const item of cartData) {
-        const product = await getProductById(item.productId);
-        if (!product) continue;
+    case "checkout.session.expired":
+      await handleCheckoutExpired(event.data.object);
+      break;
 
-        const isGift = !!item.giftRecipient;
-        const recipient = item.giftRecipient || session.metadata?.userId || "self";
-        
-        const billingType = product.billingType || "one_time";
-        const durationDays = billingType === "lifetime" 
-          ? undefined 
-          : billingType === "subscription"
-            ? product.subscriptionInterval === "year" ? 365 : 30
-            : (product.durationDays || 30);
+    case "checkout.session.async_payment_failed":
+      await handleCheckoutFailed(event.data.object);
+      break;
 
-        await createPendingPurchase({
-          oderId: `ord_${Date.now()}_${item.productId}`,
-          userId: session.metadata?.userId || undefined,
-          stripeSessionId: session.id,
-          productId: item.productId,
-          productName: product.name,
-          productCategory: product.category,
-          billingType,
-          durationDays,
-          recipientUsername: recipient,
-          isGift,
-          amount: product.price * item.quantity,
-          status: "completed",
-        });
-      }
-    } else {
-      const productId = session.metadata?.productId;
-      if (productId) {
-        const product = await getProductById(productId);
-        if (product) {
-          const billingType = product.billingType || "one_time";
-          const durationDays = billingType === "lifetime" 
-            ? undefined 
-            : billingType === "subscription"
-              ? product.subscriptionInterval === "year" ? 365 : 30
-              : (product.durationDays || 30);
+    case "invoice.paid":
+      await handleInvoicePaid(event.data.object);
+      break;
 
-          await createPendingPurchase({
-            oderId: `ord_${Date.now()}`,
-            userId: session.metadata?.userId || undefined,
-            stripeSessionId: session.id,
-            productId: product._id.toString(),
-            productName: product.name,
-            productCategory: product.category,
-            billingType,
-            durationDays,
-            recipientUsername: "self",
-            isGift: false,
-            amount: product.price,
-            status: "completed",
-          });
-        }
-      }
-    }
+    case "customer.subscription.updated":
+      await handleSubscriptionUpdated(event.data.object);
+      break;
 
-    console.log("Created pending purchases for session:", session.id);
+    case "customer.subscription.deleted":
+      await handleSubscriptionDeleted(event.data.object);
+      break;
+
+    case "invoice.payment_failed":
+      await handleInvoicePaymentFailed(event.data.object);
+      break;
+
+    case "charge.refunded":
+      await handleChargeRefunded(event.data.object);
+      break;
   }
 
   return NextResponse.json({ received: true });

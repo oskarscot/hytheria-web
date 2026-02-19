@@ -1,7 +1,8 @@
 import { getDatabase } from "@/lib/db";
-import { UUID } from "mongodb";
+import { ObjectId, UUID } from "mongodb";
 
 export interface LinkedAccount {
+  userId: string;
   discordId: string;
   playerUuid: string;
   linkedAt: Date;
@@ -31,6 +32,7 @@ export async function getLinkedAccountByDiscordId(
   }
 
   return {
+    userId: record.userId,
     discordId: record.discordId,
     playerUuid: record.playerUuid,
     linkedAt: record.linkedAt ? new Date(record.linkedAt) : new Date(0),
@@ -38,11 +40,39 @@ export async function getLinkedAccountByDiscordId(
   };
 }
 
+export async function getLinkedAccountByUserId(
+  userId: string
+): Promise<LinkedAccount | null> {
+  const db = await getDatabase();
+  const record = await db.collection("linked_accounts").findOne({ userId });
+
+  if (!record) {
+    return null;
+  }
+
+  return {
+    userId: record.userId,
+    discordId: record.discordId,
+    playerUuid: record.playerUuid,
+    linkedAt: record.linkedAt ? new Date(record.linkedAt) : new Date(0),
+    linkedBy: record.linkedBy ?? "code",
+  };
+}
+
+export async function getDiscordAccountId(userId: string): Promise<string | null> {
+  const db = await getDatabase();
+  const account = await db.collection("account").findOne({
+    userId: new ObjectId(userId),
+    providerId: "discord",
+  });
+  return account?.accountId ?? null;
+}
+
 export async function getLinkedAccountWithPlayer(
-  discordId: string
+  userId: string
 ): Promise<LinkedAccountWithPlayer | null> {
   const db = await getDatabase();
-  const linkedAccount = await db.collection("linked_accounts").findOne({ discordId });
+  const linkedAccount = await db.collection("linked_accounts").findOne({ userId });
 
   if (!linkedAccount) {
     return null;
@@ -54,6 +84,7 @@ export async function getLinkedAccountWithPlayer(
 
   return {
     linkedAccount: {
+      userId: linkedAccount.userId,
       discordId: linkedAccount.discordId,
       playerUuid: linkedAccount.playerUuid,
       linkedAt: linkedAccount.linkedAt ? new Date(linkedAccount.linkedAt) : new Date(0),
@@ -69,6 +100,7 @@ export async function getLinkedAccountWithPlayer(
 }
 
 export async function createLinkedAccountByCode(
+  userId: string,
   discordId: string,
   code: string
 ): Promise<LinkedAccount | null> {
@@ -92,6 +124,7 @@ export async function createLinkedAccountByCode(
   }
 
   const linkedAccount: LinkedAccount = {
+    userId,
     discordId,
     playerUuid: linkingCode.playerUuid,
     linkedAt: now,
@@ -99,7 +132,7 @@ export async function createLinkedAccountByCode(
   };
 
   await db.collection("linked_accounts").updateOne(
-    { discordId },
+    { userId },
     {
       $set: {
         ...linkedAccount,
