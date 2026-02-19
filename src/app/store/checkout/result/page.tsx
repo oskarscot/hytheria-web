@@ -2,13 +2,13 @@
 
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 type ResultType = "success" | "canceled" | "error";
 
-export default function CheckoutResultPage() {
+function CheckoutResultContent() {
   const searchParams = useSearchParams();
   const [result, setResult] = useState<ResultType | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -107,5 +107,17 @@ export default function CheckoutResultPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutResultPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+      </div>
+    }>
+      <CheckoutResultContent />
+    </Suspense>
   );
 }
