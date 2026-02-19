@@ -48,7 +48,9 @@ export async function POST(request: Request) {
 
       const lineItems = itemsWithProducts.map(({ item, product }) => {
         const quantity = Number(item.quantity);
-        return {
+        const isSubscription = product?.category === "rank" && product?.billingType === "subscription";
+        
+        const lineItem: any = {
           price_data: {
             currency: "eur",
             product_data: {
@@ -59,6 +61,14 @@ export async function POST(request: Request) {
           },
           quantity,
         };
+
+        if (isSubscription) {
+          lineItem.price_data.recurring = {
+            interval: product?.subscriptionInterval || "month",
+          };
+        }
+
+        return lineItem;
       });
 
       if (lineItems.some((item) => !Number.isInteger(item.quantity) || item.quantity < 1)) {
@@ -117,22 +127,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    const isSubscription = product.category === "rank" && product.billingType === "subscription";
+    
+    const lineItem: any = {
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: product.name,
+          description: product.description,
+        },
+        unit_amount: product.price,
+      },
+      quantity,
+    };
+
+    if (isSubscription) {
+      lineItem.price_data.recurring = {
+        interval: product.subscriptionInterval || "month",
+      };
+    }
+
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: product.name,
-              description: product.description,
-            },
-            unit_amount: product.price,
-          },
-          quantity,
-        },
-      ],
-      mode: product.category === "rank" && product.billingType === "subscription" ? "subscription" : "payment",
+      line_items: [lineItem],
+      mode: isSubscription ? "subscription" : "payment",
       allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store?canceled=true`,
