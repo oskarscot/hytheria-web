@@ -73,6 +73,7 @@ export async function POST(request: Request) {
         payment_method_types: ["card"],
         line_items: lineItems as any,
         mode: hasSubscription ? "subscription" : "payment",
+        allow_promotion_codes: true,
         success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store/checkout/result?type=success`,
         cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store/checkout/result?type=canceled`,
         metadata: {
@@ -132,6 +133,7 @@ export async function POST(request: Request) {
         },
       ],
       mode: product.category === "rank" && product.billingType === "subscription" ? "subscription" : "payment",
+      allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/store?canceled=true`,
       metadata: {
