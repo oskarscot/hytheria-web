@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { PageLayout } from "@/components/layout/PageLayout";
 import { getActiveProducts } from "@/lib/queries/shop";
 import { BuyButton } from "@/components/shop/BuyButton";
